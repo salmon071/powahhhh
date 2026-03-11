@@ -18,6 +18,8 @@
             --text-main: #f8fafc;
             --text-dim: #94a3b8;
             --border: #334155;
+            --danger: #ef4444;
+            --warning: #fbbf24;
         }
 
         * { box-sizing: border-box; }
@@ -52,6 +54,23 @@
         .status-badge { display: flex; align-items: center; gap: 8px; background: #1e293b; padding: 8px 16px; border-radius: 99px; font-size: 0.8rem; border: 1px solid var(--border); }
         .dot { width: 10px; height: 10px; border-radius: 50%; background: #ef4444; }
         .dot.online { background: #22c55e; box-shadow: 0 0 10px #22c55e; }
+
+        /* ALERT SYSTEM OVERLAY */
+        #alert-box {
+            width: 100%;
+            padding: 12px 20px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+            font-weight: 700;
+            font-size: 0.85rem;
+            display: none;
+            text-align: center;
+            border: 1px solid transparent;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .alert-danger { background: rgba(239, 68, 68, 0.15); color: #f87171; border-color: var(--danger) !important; display: block !important; }
+        .alert-warning { background: rgba(251, 191, 36, 0.1); color: #fbbf24; border-color: var(--warning) !important; display: block !important; }
 
         /* TOP SUMMARY */
         .summary-container {
@@ -136,6 +155,8 @@
         </div>
     </header>
 
+    <div id="alert-box"></div>
+
     <div class="summary-container">
         <div class="summary-card" style="border-left: 4px solid #ef4444;">
             <div class="card-label">Power Loss (Daya Terbuang)</div>
@@ -165,7 +186,7 @@
                 </div>
                 <div class="card">
                     <div class="card-label">Frequency</div>
-                    <div class="card-value"><span id="f_in">0.0</span><span class="unit">Hz</span></div>
+                    <div class="card-value"><span id="f_in">0.00</span><span class="unit">Hz</span></div>
                 </div>
                 <div class="card">
                     <div class="card-label">Power Factor</div>
@@ -191,7 +212,7 @@
                 </div>
                 <div class="card">
                     <div class="card-label">Frequency</div>
-                    <div class="card-value"><span id="f_out">0.0</span><span class="unit">Hz</span></div>
+                    <div class="card-value"><span id="f_out">0.00</span><span class="unit">Hz</span></div>
                 </div>
                 <div class="card">
                     <div class="card-label">Power Factor</div>
@@ -245,18 +266,56 @@
     client.on('message', (topic, message) => {
         try {
             const data = JSON.parse(message.toString());
+            const alertBox = document.getElementById('alert-box');
             
-            // Map data ke ID elemen (sesuai JSON ESP32 lo)
+            // Map data ke ID elemen
             const keys = ['v_in', 'i_in', 'p_in', 'f_in', 'pf_in', 'v_out', 'i_out', 'p_out', 'f_out', 'pf_out', 'loss'];
             keys.forEach(key => {
                 if(data[key] !== undefined) {
                     const el = document.getElementById(key);
-                    if(el) el.innerText = data[key];
+                    if(el) {
+                        // Khusus frekuensi kita paksa 2 desimal
+                        el.innerText = (key === 'f_in' || key === 'f_out') ? data[key].toFixed(2) : data[key];
+                    }
                 }
             });
 
+            // LOGIKA ALERT (Berbasis Voltage Out & Frequency Out)
+            let voltOut = data.v_out || 0;
+            let freqOut = data.f_out || 0;
+            let messages = [];
+            let severity = '';
+
+            // 1. Cek Voltage Alert
+            if (voltOut < 150 || voltOut > 250) {
+                messages.push(`TEGANGAN KRITIS (${voltOut.toFixed(1)}V)`);
+                severity = 'danger';
+            } else if (voltOut < 180) {
+                messages.push(`TEGANGAN DROP (${voltOut.toFixed(1)}V)`);
+                if (severity !== 'danger') severity = 'warning';
+            }
+
+            // 2. Cek Frequency Alert
+            if (freqOut > 0) {
+                if (freqOut < 49.0 || freqOut > 51.0) {
+                    messages.push(`FREKUENSI BERBAHAYA (${freqOut.toFixed(2)}Hz)`);
+                    severity = 'danger';
+                } else if (freqOut !== 50.0) {
+                    messages.push(`FREKUENSI TIDAK STABIL (${freqOut.toFixed(2)}Hz)`);
+                    if (severity !== 'danger') severity = 'warning';
+                }
+            }
+
+            // Update Tampilan Alert Box
+            if (messages.length > 0) {
+                alertBox.className = severity === 'danger' ? 'alert-danger' : 'alert-warning';
+                alertBox.innerHTML = `⚠️ <b>WARNING SYSTEM:</b> ${messages.join(' | ')}`;
+            } else {
+                alertBox.style.display = 'none';
+            }
+
             // Hitung Efisiensi
-            if(data.p_in > 5) { // Hanya hitung jika ada beban masuk > 5W
+            if(data.p_in > 5) { 
                 let efficiency = (data.p_out / data.p_in) * 100;
                 document.getElementById('eff').innerText = Math.min(efficiency, 100).toFixed(1);
             } else {
