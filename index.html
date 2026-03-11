@@ -43,17 +43,70 @@
             flex-shrink: 0;
         }
 
-        .logo { font-size: 1.25rem; font-weight: 800; margin-bottom: 40px; color: var(--accent); display: flex; align-items: center; gap: 8px; }
-        .nav-link { color: var(--text-dim); text-decoration: none; padding: 12px; border-radius: 8px; font-size: 0.9rem; margin-bottom: 8px; transition: 0.2s; font-weight: 500; }
-        .nav-link.active { background: #1e293b; color: var(--text-main); border: 1px solid var(--border); }
+        .logo { 
+            font-size: 1.25rem; 
+            font-weight: 800; 
+            margin-bottom: 40px; 
+            color: var(--accent); 
+            display: flex; 
+            align-items: center; 
+            gap: 8px; 
+        }
+
+        .nav-link { 
+            color: var(--text-dim); 
+            text-decoration: none; 
+            padding: 12px; 
+            border-radius: 8px; 
+            font-size: 0.9rem; 
+            margin-bottom: 8px; 
+            transition: 0.2s; 
+            font-weight: 500; 
+        }
+
+        .nav-link.active { 
+            background: #1e293b; 
+            color: var(--text-main); 
+            border: 1px solid var(--border); 
+        }
 
         /* MAIN CONTENT */
-        .main-content { flex: 1; padding: 30px; width: 100%; overflow-y: auto; }
+        .main-content { 
+            flex: 1; 
+            padding: 30px; 
+            width: 100%; 
+            overflow-y: auto; 
+        }
 
-        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
-        .status-badge { display: flex; align-items: center; gap: 8px; background: #1e293b; padding: 8px 16px; border-radius: 99px; font-size: 0.8rem; border: 1px solid var(--border); }
-        .dot { width: 10px; height: 10px; border-radius: 50%; background: #ef4444; }
-        .dot.online { background: #22c55e; box-shadow: 0 0 10px #22c55e; }
+        .header { 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center; 
+            margin-bottom: 25px; 
+        }
+
+        .status-badge { 
+            display: flex; 
+            align-items: center; 
+            gap: 8px; 
+            background: #1e293b; 
+            padding: 8px 16px; 
+            border-radius: 99px; 
+            font-size: 0.8rem; 
+            border: 1px solid var(--border); 
+        }
+
+        .dot { 
+            width: 10px; 
+            height: 10px; 
+            border-radius: 50%; 
+            background: #ef4444; 
+        }
+
+        .dot.online { 
+            background: #22c55e; 
+            box-shadow: 0 0 10px #22c55e; 
+        }
 
         /* ALERT SYSTEM OVERLAY */
         #alert-box {
@@ -69,8 +122,20 @@
             text-transform: uppercase;
             letter-spacing: 0.5px;
         }
-        .alert-danger { background: rgba(239, 68, 68, 0.15); color: #f87171; border-color: var(--danger) !important; display: block !important; }
-        .alert-warning { background: rgba(251, 191, 36, 0.1); color: #fbbf24; border-color: var(--warning) !important; display: block !important; }
+
+        .alert-danger { 
+            background: rgba(239, 68, 68, 0.15); 
+            color: #f87171; 
+            border-color: var(--danger) !important; 
+            display: block !important; 
+        }
+
+        .alert-warning { 
+            background: rgba(251, 191, 36, 0.1); 
+            color: #fbbf24; 
+            border-color: var(--warning) !important; 
+            display: block !important; 
+        }
 
         /* TOP SUMMARY */
         .summary-container {
@@ -79,6 +144,7 @@
             gap: 20px;
             margin-bottom: 25px;
         }
+
         .summary-card {
             background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
             border: 1px solid var(--border);
@@ -97,7 +163,13 @@
             margin-bottom: 25px;
         }
 
-        .system-section { background: rgba(30, 41, 59, 0.3); border-radius: 20px; padding: 20px; border: 1px solid var(--border); }
+        .system-section { 
+            background: rgba(30, 41, 59, 0.3); 
+            border-radius: 20px; 
+            padding: 20px; 
+            border: 1px solid var(--border); 
+        }
+
         .section-header {
             font-size: 0.85rem;
             font-weight: 800;
@@ -109,16 +181,52 @@
             letter-spacing: 1px;
         }
 
-        .stats-subgrid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+        .stats-subgrid { 
+            display: grid; 
+            grid-template-columns: repeat(2, 1fr); 
+            gap: 12px; 
+        }
 
-        .card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px; padding: 18px; transition: 0.3s; }
+        .card { 
+            background: var(--card-bg); 
+            border: 1px solid var(--border); 
+            border-radius: 12px; 
+            padding: 18px; 
+            transition: 0.3s; 
+        }
+
         .card.full { grid-column: span 2; }
-        .card-label { font-size: 0.65rem; color: var(--text-dim); text-transform: uppercase; margin-bottom: 6px; font-weight: 600; }
-        .card-value { font-size: 1.6rem; font-weight: 700; display: flex; align-items: baseline; gap: 4px; }
-        .unit { font-size: 0.8rem; font-weight: 400; color: var(--text-dim); }
+
+        .card-label { 
+            font-size: 0.65rem; 
+            color: var(--text-dim); 
+            text-transform: uppercase; 
+            margin-bottom: 6px; 
+            font-weight: 600; 
+        }
+
+        .card-value { 
+            font-size: 1.6rem; 
+            font-weight: 700; 
+            display: flex; 
+            align-items: baseline; 
+            gap: 4px; 
+        }
+
+        .unit { 
+            font-size: 0.8rem; 
+            font-weight: 400; 
+            color: var(--text-dim); 
+        }
 
         /* CHART */
-        .chart-section { background: var(--card-bg); border: 1px solid var(--border); border-radius: 16px; padding: 20px; height: 350px; }
+        .chart-section { 
+            background: var(--card-bg); 
+            border: 1px solid var(--border); 
+            border-radius: 16px; 
+            padding: 20px; 
+            height: 350px; 
+        }
 
         /* MOBILE FIX */
         @media (max-width: 900px) {
@@ -235,11 +343,12 @@
     // MQTT CONFIG
     const host = 'wss://na1f1916.ala.asia-southeast1.emqxsl.com:8084/mqtt';
     const client = mqtt.connect(host, {
-        username: 'salmon', password: 'salmon123',
+        username: 'salmon', 
+        password: 'salmon123',
         clientId: 'Web_Pro_Final_' + Math.random().toString(16).substr(2, 6)
     });
 
-    // CHART CONFIG
+    // CHART CONFIG - FOKUS UPDATE SKALA
     const ctx = document.getElementById('dualChart').getContext('2d');
     const chart = new Chart(ctx, {
         type: 'line',
@@ -251,10 +360,20 @@
             ]
         },
         options: {
-            responsive: true, maintainAspectRatio: false,
-            plugins: { legend: { labels: { color: '#94a3b8', font: { size: 11 } } } },
+            responsive: true, 
+            maintainAspectRatio: false,
+            plugins: { 
+                legend: { labels: { color: '#94a3b8', font: { size: 11 } } } 
+            },
             scales: {
-                y: { grid: { color: '#334155' }, ticks: { color: '#94a3b8' } },
+                y: { 
+                    min: 100, // Terendah di 100V
+                    grid: { color: '#334155' }, 
+                    ticks: { 
+                        color: '#94a3b8',
+                        stepSize: 20 // Skala per 20
+                    } 
+                },
                 x: { display: false }
             }
         }
@@ -277,19 +396,17 @@
                 if(data[key] !== undefined) {
                     const el = document.getElementById(key);
                     if(el) {
-                        // Khusus frekuensi kita paksa 2 desimal
-                        el.innerText = (key === 'f_in' || key === 'f_out') ? data[key].toFixed(2) : data[key];
+                        el.innerText = (key.startsWith('f_')) ? data[key].toFixed(2) : data[key];
                     }
                 }
             });
 
-            // LOGIKA ALERT (Berbasis Voltage Out & Frequency Out)
+            // LOGIKA ALERT LENGKAP
             let voltOut = data.v_out || 0;
             let freqOut = data.f_out || 0;
             let messages = [];
             let severity = '';
 
-            // 1. Cek Voltage Alert
             if (voltOut < 150 || voltOut > 250) {
                 messages.push(`TEGANGAN KRITIS (${voltOut.toFixed(1)}V)`);
                 severity = 'danger';
@@ -298,21 +415,10 @@
                 if (severity !== 'danger') severity = 'warning';
             }
 
-            // 2. Cek Frequency Alert
-            if (freqOut > 0) {
-                if (freqOut < 49.0 || freqOut > 51.0) {
-                    //messages.push(`FREKUENSI BERBAHAYA (${freqOut.toFixed(2)}Hz)`);
-                    severity = 'danger';
-                } else if (freqOut !== 50.0) {
-                    //messages.push(`FREKUENSI TIDAK STABIL (${freqOut.toFixed(2)}Hz)`);
-                    if (severity !== 'danger') severity = 'warning';
-                }
-            }
-
-            // Update Tampilan Alert Box
             if (messages.length > 0) {
                 alertBox.className = severity === 'danger' ? 'alert-danger' : 'alert-warning';
-                alertBox.innerHTML = `⚠️ <b>WARNING SYSTEM:</b>`;
+                alertBox.innerHTML = `⚠️ <b>WARNING SYSTEM:</b> ${messages[0]}`;
+                alertBox.style.display = 'block';
             } else {
                 alertBox.style.display = 'none';
             }
@@ -332,7 +438,9 @@
             chart.data.datasets[1].data.shift();
             chart.update('none');
 
-        } catch (e) { console.error("Error Processing Data:", e); }
+        } catch (e) { 
+            console.error("Error Processing Data:", e); 
+        }
     });
 
     client.on('close', () => {
