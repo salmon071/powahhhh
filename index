@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dual Power Monitor | PLN vs Stabilizer</title>
+    <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --sidebar-bg: #111827;
+            --main-bg: #0f172a;
+            --card-bg: #1e293b;
+            --accent: #38bdf8;
+            --pln-color: #fbbf24;
+            --stab-color: #10b981;
+            --text-main: #f8fafc;
+            --text-dim: #94a3b8;
+            --border: #334155;
+        }
+
+        * { box-sizing: border-box; }
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--main-bg);
+            color: var(--text-main);
+            margin: 0;
+            display: flex;
+            min-height: 100vh;
+        }
+
+        .sidebar {
+            width: 240px;
+            background: var(--sidebar-bg);
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            padding: 24px;
+            flex-shrink: 0;
+        }
+
+        .logo { font-size: 1.2rem; font-weight: 700; margin-bottom: 30px; color: var(--accent); }
+        nav { display: flex; flex-direction: column; gap: 10px; }
+        .nav-link { color: var(--text-dim); text-decoration: none; padding: 10px; border-radius: 8px; font-size: 0.9rem; }
+        .nav-link.active { background: #1f2937; color: var(--text-main); }
+
+        .main-content { flex: 1; padding: 30px; width: 100%; overflow-y: auto; }
+
+        .header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
+        .status-badge { display: flex; align-items: center; gap: 8px; background: #1e293b; padding: 8px 15px; border-radius: 99px; font-size: 0.8rem; border: 1px solid var(--border); }
+        .dot { width: 10px; height: 10px; border-radius: 50%; background: #ef4444; }
+        .dot.online { background: #22c55e; box-shadow: 0 0 8px #22c55e; }
+
+        /* GRID SYSTEM */
+        .dual-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+            margin-bottom: 25px;
+        }
+
+        .section-title {
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .grid-stats {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .card {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 15px;
+            text-align: center;
+        }
+
+        .card.wide { grid-column: span 2; }
+        .card-label { font-size: 0.65rem; color: var(--text-dim); text-transform: uppercase; margin-bottom: 8px; }
+        .card-value { font-size: 1.5rem; font-weight: 700; display: flex; align-items: baseline; justify-content: center; gap: 4px; }
+        .unit { font-size: 0.8rem; font-weight: 400; color: var(--text-dim); }
+
+        /* LOSS CARD */
+        .loss-container {
+            background: linear-gradient(to right, #1e293b, #0f172a);
+            border: 1px solid #ef444444;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .chart-container {
+            background: var(--card-bg);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 20px;
+            height: 300px;
+        }
+
+        /* RESPONSIVE */
+        @media (max-width: 900px) {
+            body { flex-direction: column; }
+            .sidebar { width: 100%; padding: 15px; border-bottom: 1px solid var(--border); }
+            nav { flex-direction: row; overflow-x: auto; }
+            .dual-container { grid-template-columns: 1fr; }
+            .main-content { padding: 20px; }
+            .chart-container { height: 250px; }
+        }
+    </style>
+</head>
+<body>
+
+<aside class="sidebar">
+    <div class="logo">⚡ POWER MONITOR</div>
+    <nav>
+        <a href="#" class="nav-link active">Dashboard</a>
+        <a href="#" class="nav-link">Analytics</a>
+        <a href="#" class="nav-link">Settings</a>
+    </nav>
+</aside>
+
+<main class="main-content">
+    <header class="header">
+        <div>
+            <h1 style="margin:0; font-size: 1.5rem;">System Overview</h1>
+            <p style="color: var(--text-dim); font-size: 0.85rem; margin-top: 5px;">ESP32 Dual-PZEM Monitoring</p>
+        </div>
+        <div class="status-badge">
+            <span id="status-dot" class="dot"></span>
+            <span id="status-text">Disconnected</span>
+        </div>
+    </header>
+
+    <div class="loss-container">
+        <div>
+            <div style="font-size: 0.75rem; color: #ef4444; font-weight: 700;">POWER LOSS (PLN - STAB)</div>
+            <div style="font-size: 1.8rem; font-weight: 800;"><span id="loss">0.0</span> <span class="unit">W</span></div>
+        </div>
+        <div style="text-align: right; color: var(--text-dim); font-size: 0.8rem;">
+            Efficiency: <span id="eff" style="color: var(--accent); font-weight: bold;">0%</span>
+        </div>
+    </div>
+
+    <div class="dual-container">
+        <div>
+            <div class="section-title" style="color: var(--pln-color);">● Input PLN</div>
+            <div class="grid-stats">
+                <div class="card wide">
+                    <div class="card-label">Voltage In</div>
+                    <div class="card-value"><span id="v_in">0.0</span><span class="unit">V</span></div>
+                </div>
+                <div class="card">
+                    <div class="card-label">Power</div>
+                    <div class="card-value"><span id="p_in">0.0</span><span class="unit">W</span></div>
+                </div>
+                <div class="card">
+                    <div class="card-label">Freq</div>
+                    <div class="card-value" style="font-size: 1.2rem;"><span id="f_in">0.0</span><span class="unit">Hz</span></div>
+                </div>
+            </div>
+        </div>
+
+        <div>
+            <div class="section-title" style="color: var(--stab-color);">● Output Stabilizer</div>
+            <div class="grid-stats">
+                <div class="card wide">
+                    <div class="card-label">Voltage Out</div>
+                    <div class="card-value" style="color: var(--stab-color);"><span id="v_out">0.0</span><span class="unit">V</span></div>
+                </div>
+                <div class="card">
+                    <div class="card-label">Power</div>
+                    <div class="card-value"><span id="p_out">0.0</span><span class="unit">W</span></div>
+                </div>
+                <div class="card">
+                    <div class="card-label">Factor</div>
+                    <div class="card-value" style="font-size: 1.2rem;"><span id="pf_out">0.00</span><span class="unit">PF</span></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="chart-container">
+        <canvas id="dualChart"></canvas>
+    </div>
+</main>
+
+<script>
+    const host = 'wss://na1f1916.ala.asia-southeast1.emqxsl.com:8084/mqtt';
+    const client = mqtt.connect(host, {
+        username: 'salmon', password: 'salmon123',
+        clientId: 'Web_Dual_' + Math.random().toString(16).substr(2, 5)
+    });
+
+    const ctx = document.getElementById('dualChart').getContext('2d');
+    const chart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: Array(20).fill(''),
+            datasets: [
+                { label: 'PLN (In)', data: Array(20).fill(null), borderColor: '#fbbf24', tension: 0.4, pointRadius: 0 },
+                { label: 'Stabilizer (Out)', data: Array(20).fill(null), borderColor: '#10b981', tension: 0.4, pointRadius: 0 }
+            ]
+        },
+        options: {
+            responsive: true, maintainAspectRatio: false,
+            plugins: { legend: { labels: { color: '#94a3b8' } } },
+            scales: {
+                y: { grid: { color: '#334155' }, ticks: { color: '#94a3b8' } },
+                x: { display: false }
+            }
+        }
+    });
+
+    client.on('connect', () => {
+        document.getElementById('status-dot').className = 'dot online';
+        document.getElementById('status-text').innerText = 'Connected';
+        client.subscribe('pzem/realtime');
+    });
+
+    client.on('message', (topic, message) => {
+        try {
+            const data = JSON.parse(message.toString());
+            
+            // PLN Update
+            if(data.v_in) document.getElementById('v_in').innerText = data.v_in;
+            if(data.p_in) document.getElementById('p_in').innerText = data.p_in;
+            if(data.f_in) document.getElementById('f_in').innerText = data.f_in;
+
+            // STAB Update
+            if(data.v_out) document.getElementById('v_out').innerText = data.v_out;
+            if(data.p_out) document.getElementById('p_out').innerText = data.p_out;
+            if(data.pf_out) document.getElementById('pf_out').innerText = data.pf_out;
+
+            // LOSS & EFFICIENCY
+            if(data.loss) document.getElementById('loss').innerText = data.loss;
+            if(data.p_in > 0 && data.p_out >= 0) {
+                let eff = (data.p_out / data.p_in) * 100;
+                document.getElementById('eff').innerText = Math.min(eff, 100).toFixed(1) + '%';
+            }
+
+            // CHART Update
+            chart.data.datasets[0].data.push(data.v_in);
+            chart.data.datasets[0].data.shift();
+            chart.data.datasets[1].data.push(data.v_out);
+            chart.data.datasets[1].data.shift();
+            chart.update('none');
+
+        } catch (e) { console.error("Data Error", e); }
+    });
+</script>
+</body>
+</html>
