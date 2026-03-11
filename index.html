@@ -135,8 +135,11 @@
 <body>
 
 <aside class="sidebar">
-    <div class="logo">⚡ POWER PRO V2</div>
-    <nav>
+    <div class="logo" style="margin-bottom:30px; text-align:center;">
+        <img src="Logo.jpeg" alt="ETIS Logo" style="max-width:140px; margin-top:5px;">
+    </div>
+
+    <nav style="display:flex; flex-direction:column; gap:10px;">
         <a href="#" class="nav-link active">Real-time Monitor</a>
         <a href="#" class="nav-link">Device Logs</a>
         <a href="#" class="nav-link">Network Settings</a>
@@ -298,10 +301,10 @@
             // 2. Cek Frequency Alert
             if (freqOut > 0) {
                 if (freqOut < 49.0 || freqOut > 51.0) {
-                    messages.push(`FREKUENSI BERBAHAYA (${freqOut.toFixed(2)}Hz)`);
+                    //messages.push(`FREKUENSI BERBAHAYA (${freqOut.toFixed(2)}Hz)`);
                     severity = 'danger';
                 } else if (freqOut !== 50.0) {
-                    messages.push(`FREKUENSI TIDAK STABIL (${freqOut.toFixed(2)}Hz)`);
+                    //messages.push(`FREKUENSI TIDAK STABIL (${freqOut.toFixed(2)}Hz)`);
                     if (severity !== 'danger') severity = 'warning';
                 }
             }
@@ -309,7 +312,7 @@
             // Update Tampilan Alert Box
             if (messages.length > 0) {
                 alertBox.className = severity === 'danger' ? 'alert-danger' : 'alert-warning';
-                alertBox.innerHTML = `⚠️ <b>WARNING SYSTEM:</b> ${messages.join(' | ')}`;
+                alertBox.innerHTML = `⚠️ <b>WARNING SYSTEM:</b>`;
             } else {
                 alertBox.style.display = 'none';
             }
